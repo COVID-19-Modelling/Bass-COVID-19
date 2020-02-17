@@ -189,8 +189,8 @@ simulate_scenarios <- function(fitted, start = 0, end = 30, max_iter = 1000, dat
   }
   
   scs <- c("Baseline", 
-           "Recovery rate decaying by 20%/month", "Recovery rate decaying by 50%/month", 
-           "Double population at risk after 24th Feb", "Double population at risk after 2nd Mar"
+           "Recovery rate decaying by 20% per month", "Recovery rate decaying by 50% per month", 
+           "Effective population size doubled after 24th Feb", "Effective population size doubled after 2nd Mar"
            # "beta*2 after 24th Feb", "beta*2 after 2nd Mar"
            )
   

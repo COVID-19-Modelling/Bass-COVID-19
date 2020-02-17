@@ -1,10 +1,9 @@
 summary_fitted <- function(lbass, lbf) {
-
   res <- rbindlist(lapply(lbass, function(f) {
     with(f$Parameters, {
       n_t <- nrow(f$Cases_hat)
       cases <- f$Cases_hat[nrow(f$Cases_hat),]
-      sus <- m - cases - f$Cases$A[n_t] 
+      sus <- m - cases - f$Cases$A[length(f$Cases$A)] 
       
       r0 <- beta / sum(f$Offsets)
       re <- r0 * sus / m
@@ -13,7 +12,7 @@ summary_fitted <- function(lbass, lbf) {
         Location = f$Summary$Location,
         "Kappa * 100" = stats_fn(kappa * 100), 
         Beta = stats_fn(beta), 
-        "Population at risk (thousand)" = stats_fn(m / 1E3), 
+        "Effective population size (thousand)" = stats_fn(m / 1E3), 
         R0 = stats_fn(r0),
         "R(t)" = stats_fn(re),
         Deviance = stats_fn(deviance)

@@ -11,7 +11,6 @@ eval_epi <- function(sim, date0 = as.Date("2020-02-12", "%Y-%m-%d"), target = 30
   n_iter <- dim(tab)[3]
   
   epi <- data.frame(ID = 1:n_iter)
-  epi$R0 <- tab[start_i, "R0_En", ]
   epi$Re <- tab[start_i, "Re", ]
   epi$PeakTime <- apply(tab[, "I", ], 2, which.max)
   epi$PeakSize <- apply(tab[, "I", ], 2, max)

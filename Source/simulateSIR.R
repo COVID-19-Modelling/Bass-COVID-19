@@ -8,7 +8,6 @@ m_sir <- odin::odin({
   output(Inc) <- foi * S
   output(FOI) <- foi
   output(Re) <- (beta / dropout) * (S / m)
-  output(R0_En) <- beta / dropout
   
   foi <- beta * (I / m) 
   

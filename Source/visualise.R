@@ -1,7 +1,7 @@
 visualise_re <- function(epis) {
   dat <- collect_statistics(epis)
   
-  g_r0 <-
+  g_re <-
     dat %>% filter(Loc != "Overall") %>% select(Loc, R0, Re) %>%
     melt(id.vars = "Loc", measure.vars = c("R0", "Re")) %>% group_by(Loc, variable) %>%
     summarise_all(funs(mean = mean(value), lower = quantile(value, 0.025), upper = quantile(value, 0.975))) %>%
@@ -20,7 +20,7 @@ visualise_re <- function(epis) {
     theme_minimal() +
     theme(legend.position = c(0.8, 0.5))
   
-  return(g_r0)
+  return(g_re)
 } 
 
 visualise_peak <- function(epis, bind = T) {
@@ -260,7 +260,7 @@ visualise_ts_prv <- function(epis, log = T) {
     
   if (log) {
     g_prv <- g_prv + 
-      scale_y_log10("Number of active cases, (log10 scale)", breaks = c(5, 50, 500, 5E3, 5E4)) + 
+      scale_y_log10("Number of active cases, log10 scale", breaks = c(5, 50, 500, 5E3, 5E4)) + 
       facet_wrap(Loc~., ncol = 5)
   } else {
     g_prv <- g_prv +
@@ -290,32 +290,30 @@ visualise_scenarios <- function(res_sc) {
   g_scs_ts <- 
     rbindlist(res_sc$SummaryPrv) %>% 
     ggplot(aes(x = Date)) +
-    geom_ribbon(aes(ymin = lower, ymax = upper, fill = Scenario), alpha = 0.4) +
-    geom_line(aes(y = mean, colour = Scenario)) +
-    scale_y_log10("Number of active cases, (log10 scale)",
-                  breaks = c(5E3, 1E4, 3E4, 5E4)) +
+    geom_ribbon(aes(ymin = lower/1E3, ymax = upper/1E3, fill = Scenario), alpha = 0.4) +
+    geom_line(aes(y = mean/1E3, colour = Scenario)) +
+    scale_y_continuous("Number of active cases, thousands") +
     scale_x_date("", breaks = as.Date(c("2020-02-17", "2020-02-24", "2020-03-02", "2020-03-11")),
                  date_labels = "%e %b %Y") +
     labs(tag = "A", title = "Time-series by date") +
-    expand_limits(y=c(5E3, NA)) +
+    expand_limits(y=c(1, NA)) +
     theme(legend.position = c(0, 0), legend.justification = c(-0.1, -0.1))
   
   g_scs_range <- 
     rbindlist(res_sc$SummaryPrv) %>% 
     filter(Date %in% as.Date(c("17 Feb 2020", "24 Feb 2020", "02 Mar 2020", "11 Mar 2020"), "%d %b %Y")) %>%
     mutate(dl = reorder(format(Date, "%e %b %Y"), Date)) %>%
-    ggplot(aes(x = Scenario, y = mean)) +
+    ggplot(aes(x = Scenario, y = mean/1E3)) +
     geom_point(aes(colour = Scenario)) +
-    geom_errorbar(aes(ymin = lower, ymax = upper, colour = Scenario), width = 0.4) +
-    scale_y_log10("Number of active cases, (log10 scale)",
-                  breaks = c(1, 10, 100, 1E3, 1E4, 5E4)) +
+    geom_errorbar(aes(ymin = lower/1E3, ymax = upper/1E3, colour = Scenario), width = 0.4) +
+    scale_y_continuous("Number of active cases, thousands") +
     scale_x_discrete("") +
     facet_grid(.~dl) +
-    expand_limits(y=c(1, 5E4)) +
-    labs(tag = "B", title = "Cross-sectional comparisons") +
+    expand_limits(y=c(1, NA)) +
+    labs(tag = "B", title = "Cross-sectional comparison") +
     theme(legend.position = "none", axis.text.x = element_blank())
   
-  g_scs <- gridExtra::grid.arrange(g_scs_ts, g_scs_range, heights = c(3, 2.5))
+  g_scs <- gridExtra::grid.arrange(g_scs_ts, g_scs_range, heights = c(2.5, 2))
   
   return(g_scs)
 }

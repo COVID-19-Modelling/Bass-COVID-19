@@ -9,7 +9,6 @@ m_bass <- odin::odin({
   output(FOI) <- foi
   output(PF_Ex) <- foi_ex / foi * 100
   output(Re) <- beta / dropout * S / m
-  output(R0_En) <- beta / dropout
   
   foi <- foi_en + foi_ex
   foi_en <- beta * (I / m) 

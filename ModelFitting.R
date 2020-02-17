@@ -9,11 +9,10 @@ rm(list = ls())
 
 ##### Load requirements -----
 library(R2jags)
-library(qwraps2)
 library(data.table)
 source("Source/statistics.R")
-source("Source/FitBassSIR.R")
-source("Source/FitSIR.R")
+source("Source/fitBassSIR.R")
+source("Source/fitSIR.R")
 
 
 ##### Load data -----
@@ -34,7 +33,6 @@ get_cases <- function(prov) {
 
 ##### Set parameters -----
 n_iter <- 1E5 # number of iterations
-
 r_rec <- 1 / 22.3 # recovery rate
 r_death <- 1 / 22.2 # death rate of the infected
 

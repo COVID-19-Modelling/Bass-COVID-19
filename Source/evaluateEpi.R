@@ -12,15 +12,20 @@ eval_epi <- function(sim, date0 = as.Date("2020-02-12", "%Y-%m-%d"), target = 30
   
   epi <- data.frame(ID = 1:n_iter)
   epi$Re <- tab[start_i, "Re", ]
+  
   epi$PeakTime <- apply(tab[, "I", ], 2, which.max)
   epi$PeakSize <- apply(tab[, "I", ], 2, max)
   epi$RE1Time <- apply(tab[, "Inc", ], 2, which.max)
   epi$RE1Size <- apply(tab[, "Inc", ], 2, max)
   epi$m <- sim$Shanghai$Parameters$m
   
-  if ("PF_Ex" %in% dimnames(tab)[[2]]) {
-    epi$PrExFOI <- tab[start_i, "PF_Ex", ]
-    epi$PrExFOI <- tab[target_i, "PF_Ex", ]
+  if ("PrEx" %in% dimnames(tab)[[2]]) {
+    epi$PrExFOI <- tab[start_i, "PrEx", ]
+    epi$PrExFOI <- tab[target_i, "PrEx", ]
+  }
+  
+  if ("R0" %in% dimnames(tab)[[2]]) {
+    epi$R0 <- tab[start_i, "R0", ]
   }
   
   epi$EffN <- sim$Parameters$m
@@ -40,11 +45,15 @@ eval_epi <- function(sim, date0 = as.Date("2020-02-12", "%Y-%m-%d"), target = 30
     Prv = tab[, "I", ],
     Re = tab[, "Re", ]
   )
+  if ("PrEx" %in% dimnames(tab)[[2]]) {
+    tss_fore$PrEx <- tab[, "PrEx", ]
+  }
   
   tss_back <- list(
     Date = date_start - (nrow(sim$Cases_hat):1) + 1,
     Re_hat = sim$Re_hat,
-    Cases_hat = sim$Cases_hat
+    Cases_hat = sim$Cases_hat,
+    PrEx_hat = sim$PrEx_hat
   )
   
   cases <- sim$Data$I
@@ -55,7 +64,7 @@ eval_epi <- function(sim, date0 = as.Date("2020-02-12", "%Y-%m-%d"), target = 30
   
   return(list(
     Location = sim$Location,
-    Statistics = data.table(epi),
+    Statistics = data.table::data.table(epi),
     Forecasts = tss_fore,
     Backcasts = tss_back,
     Data = dat

@@ -50,11 +50,12 @@ ggsave(plot = gs_lock$g_paf, filename = "Output/Figure/PAF.pdf", height = height
 g_prv_log <- visualise_ts_prv(epi_bass, log = T)
 g_prv <- visualise_ts_prv(epi_bass, log = F)
 g_re <- visualise_ts_r0(epi_bass)
+g_pex <- visualise_ts_pex(epi_bass)
 
 ggsave(plot = g_prv, filename = "Output/Figure/Cases.pdf", height = 11, width = 8)
 ggsave(plot = g_prv_log, filename = "Output/Figure/CasesLog.pdf", height = 11, width = 8)
 ggsave(plot = g_re, filename = "Output/Figure/R(t).pdf", height = 11, width = 8)
-
+ggsave(plot = g_pex, filename = "Output/Figure/Pr(Exo).pdf", height = 11, width = 8)
 
 ##### Scenario analysis
 

@@ -7,8 +7,9 @@ m_bass <- odin::odin({
   
   output(Inc) <- foi * S
   output(FOI) <- foi
-  output(PF_Ex) <- foi_ex / foi * 100
+  output(PrEx) <- foi_ex / foi * 100
   output(Re) <- beta / dropout * S / m
+  output(R0) <- beta / dropout
   
   foi <- foi_en + foi_ex
   foi_en <- beta * (I / m) 
@@ -74,6 +75,7 @@ forecast_bass <- function(fitted, start = 24, end = 100, max_iter = 1000) {
   
   i_hat <- matrix(0, length(fitted$Cases$I) - 2, max_iter)
   re_hat <- matrix(0, length(fitted$Cases$I) - 2, max_iter)
+  pex_hat <- matrix(0, length(fitted$Cases$I) - 2, max_iter)
   
   sims <- array(0, c(dim(test), max_iter))
   locks <- array(0, c(dim(test), max_iter))
@@ -83,6 +85,7 @@ forecast_bass <- function(fitted, start = 24, end = 100, max_iter = 1000) {
     p <- get_bass_pars(fitted, key)
     i_hat[, i] <- fitted$Cases_hat[, key]
     re_hat[, i] <- p$beta / p$dropout * (p$m - fitted$Cases$A[-c(1:2)] - i_hat[, i]) / p$m 
+    pex_hat[, i] <- p$kappa / (p$kappa + p$beta * i_hat[, i] / p$m) * 100
     
     cm_bass$set_user(user = p)
     sims[, , i] <- cm_bass$run(times)
@@ -102,6 +105,7 @@ forecast_bass <- function(fitted, start = 24, end = 100, max_iter = 1000) {
   
   res$Cases_hat <- i_hat
   res$Re_hat <- re_hat
+  res$PrEx_hat <- pex_hat
   res$Base <- sims
   res$Lock <- locks
   class(res) <- "Simulation_BassSIR"

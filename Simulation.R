@@ -14,7 +14,7 @@ source("Source/simulateSIR.R")
 
 load(file = "Output/Fitted.rdata")
 
-max_iter <- 100
+max_iter <- 1000
 
 set.seed(1166)
 

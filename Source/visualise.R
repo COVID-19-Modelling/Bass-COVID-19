@@ -216,7 +216,7 @@ visualise_ts_r0 <- function(epis) {
     geom_vline(aes(xintercept = as.Date("20200212", "%Y%m%d")), linetype = "dashed") +
     geom_hline(aes(yintercept = 1, colour = "R(t) = 1")) +
     scale_y_continuous("Effective reproduction number", breaks = c(0, 1, 3, 5, 7, 8)) + 
-    scale_x_date("Date", 
+    scale_x_date("Date", date_labels = "%e %b %Y",
                  breaks = as.Date(c("20200124", "20200212", "20200226", "20200311"), "%Y%m%d"),
                  limits = as.Date(c("20200124", "20200311"), "%Y%m%d")) +
     scale_color_discrete("Lines") +
@@ -228,6 +228,82 @@ visualise_ts_r0 <- function(epis) {
   g_re
 }
 
+
+visualise_ts_r0_sel <- function(epis, sel, nc = 3) {
+  epis_sel <- list()
+  
+  for(i in names(epis)) {
+    if (i %in% sel) {
+      epis[[i]]$Location <- i
+      epis_sel[[i]] <- epis[[i]] 
+    }
+  }
+  
+  epis <- epis_sel
+  nc <- min(length(sel), nc)
+  
+  re_prov <- rbindlist(lapply(epis, function(epi) {
+    tab <- rbind(
+      extract_fitted(epi, key = "Re_hat", name = "Effective reproduction number"),
+      extract_tab(epi, key = "Re", name = "Effective reproduction number")
+    )
+    tab <- cbind(tab, Loc = epi$Location)
+    tab
+  }))
+  
+  #re_prov[, upper := min(upper, 5)]
+  
+  r0_prov <- collect_statistics(epis)[, .(Loc, R0)] %>% group_by(Loc) %>% summarise_all("mean")
+  
+  g_re <- ggplot(re_prov, aes(x = Date)) +
+    geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.3) +
+    geom_line(aes(y = mean)) +
+    geom_hline(data = r0_prov, aes(yintercept = R0, colour = "R0")) +
+    geom_vline(aes(xintercept = as.Date("20200212", "%Y%m%d")), linetype = "dashed") +
+    geom_hline(aes(yintercept = 1, colour = "R(t) = 1")) +
+    scale_y_continuous("Effective reproduction number", breaks = c(0, 1, 3, 5, 7, 8)) + 
+    scale_x_date("Date", date_labels = "%e %b %Y",
+                 breaks = as.Date(c("20200124", "20200212", "20200226", "20200311"), "%Y%m%d"),
+                 limits = as.Date(c("20200124", "20200311"), "%Y%m%d")) +
+    scale_color_discrete("Lines") +
+    facet_wrap(Loc~., ncol = nc) +
+    labs(title = "") +
+    #theme_minimal() +
+    theme(legend.position = "bottom", axis.text.x = element_text(angle = 60, hjust = 1))
+  
+  g_re
+}
+
+
+visualise_ts_pex <- function(epis) {
+  for(i in names(epis)) {
+    epis[[i]]$Location <- i
+  }
+  
+  pex_prov <- rbindlist(lapply(epis, function(epi) {
+    tab <- rbind(
+      extract_fitted(epi, key = "PrEx_hat", name = "Exogenous FOI")
+    )
+    tab <- cbind(tab, Loc = epi$Location)
+    tab
+  }))
+  
+  g_pex <- ggplot(pex_prov, aes(x = Date)) +
+    geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.3) +
+    geom_line(aes(y = mean)) +
+    #geom_vline(aes(xintercept = as.Date("20200212", "%Y%m%d")), linetype = "dashed") +
+    scale_y_continuous("Fraction of exogenous force of infection (%)") + 
+    scale_x_date("Date", date_labels = "%e %b %Y",
+                 breaks = as.Date(c("20200124", "20200212", "20200226", "20200311"), "%Y%m%d"),
+                 limits = as.Date(c("20200124", "20200212"), "%Y%m%d")) +
+    scale_color_discrete("Lines") +
+    facet_wrap(Loc~., ncol = 5) +
+    labs(title = "") +
+    #theme_minimal() +
+    theme(legend.position = "bottom", axis.text.x = element_text(angle = 60, hjust = 1))
+  
+  g_pex
+}
 
 
 visualise_ts_prv <- function(epis, log = T) {
@@ -274,7 +350,7 @@ visualise_ts_prv <- function(epis, log = T) {
   }
     
   g_prv <- g_prv +
-    scale_x_date("Date", 
+    scale_x_date("Date", date_labels = "%e %b %Y",
                  breaks = as.Date(c("20200124", "20200212", "20200226", "20200311"), "%Y%m%d"),
                  limits = as.Date(c("20200124", "20200311"), "%Y%m%d")) +
     scale_color_discrete("") +

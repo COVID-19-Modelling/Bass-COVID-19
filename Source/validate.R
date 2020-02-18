@@ -126,7 +126,7 @@ visualise_ts_error <- function(vld) {
   g_vld <- ggplot(vld, aes(x = Date)) +
     geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.3) +
     geom_line(aes(y = mean)) +
-    scale_y_continuous("Errors (5)", limits = c(-100, 100)) + 
+    scale_y_continuous("Forecasting errors, active cases (%)", limits = c(-100, 100)) + 
     facet_wrap(Loc~., ncol = 5) +
     scale_x_date("Date", date_labels = "%e %b %Y") +
     scale_color_discrete("") +

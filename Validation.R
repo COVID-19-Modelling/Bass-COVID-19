@@ -59,6 +59,6 @@ tab_errors <- rbindlist(list_errors)
 
 g_vld <- visualise_ts_error(tab_errors)
 
-ggsave(g_vld, filename = "Output/Figure/Validation.pdf", height = 11, width = 8)
+ggsave(g_vld, filename = "Output/Figure/Validation.pdf", height = 10, width = 8)
 
 save(g_vld, tab_errors, file = "Output/Validation.rdata")

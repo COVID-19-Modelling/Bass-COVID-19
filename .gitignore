@@ -28,3 +28,6 @@ Output/Epidemiology.rdata
 Output/Simulation.rdata
 Output/Scenarios.rdata
 Output/Fitted6.rdata
+Output/Fitted_6d.rdata
+Output/Sensitivity.rdata
+Output/Validation.rdata

@@ -62,7 +62,7 @@ ggsave(plot = g_re, filename = "Output/Figure/R(t).pdf", height = 9.5, width = 8
 ggsave(plot = g_pex, filename = "Output/Figure/Pr(Exo).pdf", height = 9.5, width = 8)
 
 g_re <- visualise_ts_r0(epi_bass)
-g_re_sel <- visualise_ts_r0_sel(epi_bass, sel = c("Xinjiang Uyghur", "Hubei", "Guizhou", "Heilongjiang"), 2)
+g_re_sel <- visualise_ts_r0_sel(epi_bass, sel = c("Xinjiang Uyghur", "Hubei", "Hebei", "Heilongjiang"), 2)
 
 
 ggsave(plot = g_re, filename = "Output/Figure/R(t).pdf", height = 9.5, width = 8)

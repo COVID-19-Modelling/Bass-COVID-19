@@ -9,7 +9,24 @@ Use Bass-SIR model to capture the dynamics of the COVID-19 outbreaks
 - Visualisation: ggplot2
 
 
-## Functionalities
+## Following our researh flow
+
+Ps. Due to the urgency of the global issue, the codes haven't well-formulated yet. We will update it soon.
+
+
+### git out project
+```
+git clone https://github.com/COVID-19-Modelling/Bass-COVID-19.git
+```
+
+### Model fitting, simulation, and analysis
+
+run **Main.R** for fetching all results
+
+
+## What this study is doing
+
+### Functionalities
 
 - Identifying exogenous and endogenous force of infection of an outbreak
 - Providing epidemic curves fitting with a Bayesian-based method 
@@ -17,13 +34,13 @@ Use Bass-SIR model to capture the dynamics of the COVID-19 outbreaks
 - Forecasting for future scenarios
  
 
-## Intervention analysis
+### Intervention analysis
 
 What if ...?
 We closed all possibiliyies which causes exogenous force of infection (Overwhelming lockdown)  
 
 
-## Scenario analysis
+### Scenario analysis
 
 Two types of scenario were considered:
 
@@ -31,7 +48,7 @@ Two types of scenario were considered:
 - Increasing accessible contact if bussiness and shool open in the near future
 
 
-## Visits related repos 
+### Visits related repos 
 
 - [TBA]() Package version of this analysis for implementing on your data
 - [TBA]() A web-based visualisation

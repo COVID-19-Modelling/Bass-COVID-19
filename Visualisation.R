@@ -65,7 +65,7 @@ g_re <- visualise_ts_r0(epi_bass)
 g_re_sel <- visualise_ts_r0_sel(epi_bass, sel = c("Xinjiang Uyghur", "Hubei", "Guizhou", "Heilongjiang"), 2)
 
 
-ggsave(plot = g_re, filename = "Output/Figure/R(t).pdf", height = 11, width = 8)
+ggsave(plot = g_re, filename = "Output/Figure/R(t).pdf", height = 9.5, width = 8)
 ggsave(plot = g_re_sel, filename = "Output/Figure/R(t) sel.pdf", height = 6, width = 7)
 
 ##### Scenario analysis

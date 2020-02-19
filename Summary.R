@@ -8,10 +8,11 @@ rm(list = ls())
 
 source("Source/statistics.R")
 source("Source/summarise.R")
+source("Source/data4vis.R")
 
 load(file = "Output/Fitted.rdata")
 load(file = "Output/Epidemiology.rdata")
-
+load(file = "Output/Scenarios.rdata")
 
 tab_fitted <- summary_fitted(list_bass, list_bfs)
 

@@ -13,6 +13,7 @@ library(data.table)
 source("Source/statistics.R")
 source("Source/fitBassSIR.R")
 source("Source/fitSIR.R")
+source("Source/summarise.R")
 
 
 ##### Load data -----
@@ -104,17 +105,13 @@ list_bass_22 <- list_bass
 load(file = "Output/Fitted.rdata")
 
 
-list_bass_22 <- list_bass
 list_bass_11 <- list_bass
-list_bass_6 <- list_bass
-
-
 
 
 
 ##### Output results -----
 sens <- summary_sensitivity(list_bass_6, list_bass_11, list_bass_22, 
-                            lables = c("D6", "D11", "D22"))
+                            labels = c("D6", "D11", "D22"))
 
 
 write.csv(sens, "Output/Table/Sensitivity.csv")

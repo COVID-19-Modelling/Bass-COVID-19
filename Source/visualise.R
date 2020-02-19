@@ -45,7 +45,7 @@ visualise_peak <- function(epis, bind = T) {
   g_peak_time <- 
     peaks %>%
     mutate(hubei = ifelse(Loc == "Hubei", "red", "black"),
-           order = PeakTime_mean,
+           order = frank(., PeakTime_mean, PeakTime_upper),
            PeakTime_mean = date0 + round(PeakTime_mean),
            PeakTime_lower = date0 + round(PeakTime_lower),
            PeakTime_upper = date0 + round(PeakTime_upper)) %>% 
@@ -69,13 +69,13 @@ visualise_lockdown <- function(epis, bind = T) {
   
   lockdown <- dat %>% filter(Loc != "Overall") %>% 
     select(Loc, PrExFOI, PAF_2, PAF_4) %>% group_by(Loc) %>% 
-    summarise_all(funs("mean", lower = quantile(., 0.025), upper = quantile(., 0.975))) %>%
+    summarise_all(funs(mean = round(mean(.)), lower = quantile(., 0.025), upper = quantile(., 0.975))) %>%
     mutate(hubei = ifelse(Loc == "Hubei", "red", "black"))
   
   
   g_exo <- 
     lockdown %>% 
-    ggplot(aes(x = reorder(Loc, PrExFOI_mean))) +
+    ggplot(aes(x = reorder(Loc, frank(., PrExFOI_mean, PrExFOI_upper)))) +
     geom_pointrange(aes(y = PrExFOI_mean, ymin = PrExFOI_lower, 
                         ymax = PrExFOI_upper, colour = hubei)) +
     scale_color_manual(values = c("black", "red")) +
@@ -86,7 +86,7 @@ visualise_lockdown <- function(epis, bind = T) {
   
   g_paf <- 
     lockdown %>%
-    ggplot(aes(x = reorder(Loc, PAF_2_mean))) +
+    ggplot(aes(x = reorder(Loc, frank(., PAF_2_mean, PAF_2_upper)))) +
     geom_pointrange(aes(y = PAF_2_mean, ymin = PAF_2_lower, ymax = PAF_2_upper, colour = hubei)) +
     scale_x_discrete("Province", position = "right") +
     scale_color_manual(values = c("black", "red")) +
@@ -108,11 +108,11 @@ visualise_lockdown <- function(epis, bind = T) {
             axis.text.y = element_text(hjust=0))
     
     links <- with(lockdown, {
-      x0 <- reorder(Loc, PrExFOI_mean)
+      x0 <- reorder(Loc, frank(lockdown, PrExFOI_mean, PrExFOI_upper))
       x0 <- sort(x0)
       anc <- 1:length(x0)
       names(anc) <- levels(x0)
-      x1 <- reorder(Loc, PAF_2_mean)
+      x1 <- reorder(Loc, frank(lockdown, PAF_2_mean, PAF_2_upper))
       lx1 <- levels(x1)
       xo <- rep(0, length(x0))
       for (i in 1:length(x0)) {

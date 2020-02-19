@@ -22,6 +22,7 @@ visualise_re <- function(epis) {
   return(g_re)
 } 
 
+
 visualise_peak <- function(epis, bind = T) {
   dat <- collect_statistics(epis)
   
@@ -246,10 +247,11 @@ visualise_ts_r0_sel <- function(epis, sel, nc = 3) {
     tab <- cbind(tab, Loc = epi$Location)
     tab
   }))
-  
+  re_prov$Loc <- factor(re_prov$Loc, levels = sel)
   #re_prov[, upper := min(upper, 5)]
   
   r0_prov <- collect_statistics(epis)[, .(Loc, R0)] %>% group_by(Loc) %>% summarise_all("mean")
+  r0_prov$Loc <- factor(r0_prov$Loc, levels = sel)
   
   g_re <- ggplot(re_prov, aes(x = Date)) +
     geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.3) +

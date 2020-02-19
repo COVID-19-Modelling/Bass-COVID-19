@@ -1,7 +1,12 @@
-#' todo meta data
+#' Epidemiological evaluation with simulation results
+#'
+#' Calculate:
+#' - Outbreak peak
+#' - R(t)
+#' - Fractions of exogenous force of infection among all incident cases
 #'
 #'
-#'
+#' Author: Chu-Chang Ku
 #'
 
 rm(list = ls())

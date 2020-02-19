@@ -1,7 +1,12 @@
-#' todo meta data
+#' Visualisation 
+#' 
+#' Visualise results of
+#' - Epidemiological evaluation
+#' - Scenario analysis
 #'
 #'
 #'
+#' Author: Chu-Chang Ku
 #'
 
 rm(list = ls())

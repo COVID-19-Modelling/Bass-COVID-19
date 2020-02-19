@@ -1,7 +1,10 @@
-#' todo meta data
+#' Epidemic forecasting
 #'
-#'
-#'
+#' Based on the results of model fitting, generate epidemic curves under
+#' - baseline parameters
+#' - lockdown intervention: fixed kappa to zero as reduced models
+#' 
+#' Author: Chu-Chang Ku
 #'
 
 rm(list = ls())
@@ -14,7 +17,7 @@ source("Source/simulateSIR.R")
 
 load(file = "Output/Fitted.rdata")
 
-max_iter <- 1000
+max_iter <- 300 # 3000 to match the posterior parameters
 
 set.seed(1166)
 

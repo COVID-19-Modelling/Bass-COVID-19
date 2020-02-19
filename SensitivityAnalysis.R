@@ -1,7 +1,9 @@
+#' Sensitivity Analysis
+#' 
 #' Test different lengths of the disease duration on R0 and R(t)
 #'
 #'
-#'
+#' Author: Chu-Chang Ku
 #'
 
 rm(list = ls())

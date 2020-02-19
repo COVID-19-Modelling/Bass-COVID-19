@@ -1,7 +1,11 @@
-#' todo meta data
+#' Scenario Analysis
 #'
-#'
-#'
+#' Thinking the scenarios
+#' - Recovery rate decreases due to health system dysfunctioning and economic burden
+#' - Return to normal life (contact back to the normal level)
+#' 
+#' 
+#' Author: Chu-Chang Ku
 #'
 
 rm(list = ls())

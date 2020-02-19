@@ -1,7 +1,8 @@
-#' todo meta data
-#'
-#'
-#'
+#' Model fitting
+#' 
+#' Fit Bass-SIR model to notification data of comfirmed cases, the recovered, and the dead
+#' 
+#' Author: Chu-Chang Ku
 #'
 
 rm(list = ls())

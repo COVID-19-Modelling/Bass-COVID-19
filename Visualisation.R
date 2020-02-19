@@ -24,6 +24,10 @@ width <- 6
 height <- 7
 
 
+##### Set theme -----
+theme_set(theme_bw() + theme(text = element_text(family = "serif")))
+
+
 ##### Reproduction numbers -----
 g_re <- visualise_re(epi_bass)
 
@@ -49,13 +53,20 @@ ggsave(plot = gs_lock$g_paf, filename = "Output/Figure/PAF.pdf", height = height
 ##### Epi curves by province -----
 g_prv_log <- visualise_ts_prv(epi_bass, log = T)
 g_prv <- visualise_ts_prv(epi_bass, log = F)
-g_re <- visualise_ts_r0(epi_bass)
+
 g_pex <- visualise_ts_pex(epi_bass)
 
-ggsave(plot = g_prv, filename = "Output/Figure/Cases.pdf", height = 11, width = 8)
-ggsave(plot = g_prv_log, filename = "Output/Figure/CasesLog.pdf", height = 11, width = 8)
+ggsave(plot = g_prv, filename = "Output/Figure/Cases.pdf", height = 9.5, width = 8)
+ggsave(plot = g_prv_log, filename = "Output/Figure/CasesLog.pdf", height = 9.5, width = 8)
+ggsave(plot = g_re, filename = "Output/Figure/R(t).pdf", height = 9.5, width = 8)
+ggsave(plot = g_pex, filename = "Output/Figure/Pr(Exo).pdf", height = 9.5, width = 8)
+
+g_re <- visualise_ts_r0(epi_bass)
+g_re_sel <- visualise_ts_r0_sel(epi_bass, sel = c("Xinjiang Uyghur", "Hubei", "Guizhou", "Heilongjiang"), 2)
+
+
 ggsave(plot = g_re, filename = "Output/Figure/R(t).pdf", height = 11, width = 8)
-ggsave(plot = g_pex, filename = "Output/Figure/Pr(Exo).pdf", height = 11, width = 8)
+ggsave(plot = g_re_sel, filename = "Output/Figure/R(t) sel.pdf", height = 6, width = 7)
 
 ##### Scenario analysis
 

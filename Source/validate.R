@@ -126,13 +126,14 @@ visualise_ts_error <- function(vld) {
   g_vld <- ggplot(vld, aes(x = Date)) +
     geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.3) +
     geom_line(aes(y = mean)) +
-    scale_y_continuous("Forecasting errors, active cases (%)", limits = c(-100, 100)) + 
+    scale_y_continuous("Forecasting errors (%) of active cases", limits = c(-100, 100)) + 
     facet_wrap(Loc~., ncol = 5) +
     scale_x_date("Date", date_labels = "%e %b %Y") +
     scale_color_discrete("") +
     labs(title = "") +
-    #theme_minimal() +
-    theme(legend.position = "bottom", axis.text.x = element_text(angle = 60, hjust = 1))
+    theme_bw() +
+    theme(legend.position = "bottom", axis.text.x = element_text(angle = 60, hjust = 1), 
+          text = element_text(family = "serif"))
   
   return(g_vld)
 }

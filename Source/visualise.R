@@ -17,7 +17,6 @@ visualise_re <- function(epis) {
     scale_color_discrete("", labels = c("R0", "R(t)")) +
     expand_limits(y = c(0, 8)) +
     guides(colour = guide_legend(reverse = T)) +
-    theme_minimal() +
     theme(legend.position = c(0.8, 0.5))
   
   return(g_re)
@@ -35,11 +34,10 @@ visualise_peak <- function(epis, bind = T) {
     mutate(hubei = ifelse(Loc == "Hubei", "red", "black")) %>% 
     ggplot(aes(x = reorder(Loc, PeakSize_mean))) +
     geom_pointrange(aes(y = PeakSize_mean, ymin = PeakSize_lower, ymax = PeakSize_upper, colour = hubei)) +
-    scale_y_log10("Size of epidemic peak", breaks = c(1, 10, 100, 1000, 10000)) +
+    scale_y_log10("Size of outbreak peak", breaks = c(1, 10, 100, 1000, 10000)) +
     scale_x_discrete("Province") +
     scale_color_manual(values = c("black", "red")) +
     coord_flip() +
-    theme_minimal() +
     theme(legend.position = "none")
 
   date0 <- epis[[1]]$Forecasts$Date[1] - 1
@@ -53,11 +51,10 @@ visualise_peak <- function(epis, bind = T) {
            PeakTime_upper = date0 + round(PeakTime_upper)) %>% 
     ggplot(aes(x = reorder(Loc, order))) +
     geom_pointrange(aes(y = PeakTime_mean, ymin = PeakTime_lower, ymax = PeakTime_upper, colour = hubei)) +
-    scale_y_date("Date of epidemic peak") +
+    scale_y_date("Date of outbreak peak") +
     scale_x_discrete("Province") +
     scale_color_manual(values = c("black", "red")) +
     coord_flip() +
-    theme_minimal() +
     theme(legend.position = "none")
   
   
@@ -83,8 +80,7 @@ visualise_lockdown <- function(epis, bind = T) {
                         ymax = PrExFOI_upper, colour = hubei)) +
     scale_color_manual(values = c("black", "red")) +
     coord_flip() +
-    expand_limits(y=c(0, 100)) +
-    theme_minimal()
+    expand_limits(y=c(0, 100))
   
   #ggsave(plot = g_exo, filename = "Output/Figure/ExoFOI.pdf")
   
@@ -99,7 +95,7 @@ visualise_lockdown <- function(epis, bind = T) {
   
   if (bind) {
     g_exo <- g_exo +
-      scale_y_reverse("Percentage (%)\n on 12th February") +
+      scale_y_reverse("Percentage (%)\n12th February") +
       scale_x_discrete("Province", position = "left") +
       labs(title = "A. Exogenous force of infection") +
       theme(legend.position = "none", axis.title.y = element_blank(),
@@ -108,7 +104,6 @@ visualise_lockdown <- function(epis, bind = T) {
     g_paf <- g_paf +
       scale_y_continuous("Percentage (%)\ntwo weeks after overwhelming lockdown") +
       labs(title = "B. Population Attributable Fraction") +
-      theme_minimal() +
       theme(legend.position = "none", axis.title.y = element_blank(), 
             axis.text.y = element_text(hjust=0))
     
@@ -136,7 +131,6 @@ visualise_lockdown <- function(epis, bind = T) {
       scale_y_continuous(" \n", breaks = 0:1, labels = c("", "")) +
       coord_flip() +
       labs(title = " ") +
-      theme_minimal() +
       theme(legend.position = "none", axis.title.y = element_blank())
     
     g_lock <- grid.arrange(g_exo, g_link, g_paf, 
@@ -151,7 +145,6 @@ visualise_lockdown <- function(epis, bind = T) {
     
     g_paf <- g_paf +
       scale_y_continuous("Population Attributable Fraction (%)\ntwo weeks after overwhelming lockdown") +
-      theme_minimal() +
       theme(legend.position = "none")
       
     
@@ -186,7 +179,6 @@ visualise_ts_prov <- function(epi, loc) {
     scale_y_continuous("Number of cases") + 
     facet_wrap(Index~., scales = "free_y", nrow = 2) +
     labs(title = loc) +
-    theme_minimal() +
     theme(legend.position = "none")
   
   return(g_prov)
@@ -219,10 +211,14 @@ visualise_ts_r0 <- function(epis) {
     scale_x_date("Date", date_labels = "%e %b %Y",
                  breaks = as.Date(c("20200124", "20200212", "20200226", "20200311"), "%Y%m%d"),
                  limits = as.Date(c("20200124", "20200311"), "%Y%m%d")) +
+    geom_text(data = r0_prov, 
+              aes(x = as.Date("20200302", "%Y%m%d"), 
+                  y = R0, 
+                  label = paste0("R0=", round(R0, 1)), 
+                  vjust = -0.4)) +
     scale_color_discrete("Lines") +
     facet_wrap(Loc~., ncol = 5) +
     labs(title = "") +
-    #theme_minimal() +
     theme(legend.position = "bottom", axis.text.x = element_text(angle = 60, hjust = 1))
   
   g_re
@@ -261,6 +257,11 @@ visualise_ts_r0_sel <- function(epis, sel, nc = 3) {
     geom_hline(data = r0_prov, aes(yintercept = R0, colour = "R0")) +
     geom_vline(aes(xintercept = as.Date("20200212", "%Y%m%d")), linetype = "dashed") +
     geom_hline(aes(yintercept = 1, colour = "R(t) = 1")) +
+    # geom_text(data = r0_prov, 
+    #           aes(x = as.Date("20200302", "%Y%m%d"), 
+    #               y = R0, 
+    #               label = paste0("R0=", round(R0, 1)), 
+    #               vjust = -1)) +
     scale_y_continuous("Effective reproduction number", breaks = c(0, 1, 3, 5, 7, 8)) + 
     scale_x_date("Date", date_labels = "%e %b %Y",
                  breaks = as.Date(c("20200124", "20200212", "20200226", "20200311"), "%Y%m%d"),
@@ -268,7 +269,6 @@ visualise_ts_r0_sel <- function(epis, sel, nc = 3) {
     scale_color_discrete("Lines") +
     facet_wrap(Loc~., ncol = nc) +
     labs(title = "") +
-    #theme_minimal() +
     theme(legend.position = "bottom", axis.text.x = element_text(angle = 60, hjust = 1))
   
   g_re
@@ -291,7 +291,6 @@ visualise_ts_pex <- function(epis) {
   g_pex <- ggplot(pex_prov, aes(x = Date)) +
     geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.3) +
     geom_line(aes(y = mean)) +
-    #geom_vline(aes(xintercept = as.Date("20200212", "%Y%m%d")), linetype = "dashed") +
     scale_y_continuous("Fraction of exogenous force of infection (%)") + 
     scale_x_date("Date", date_labels = "%e %b %Y",
                  breaks = as.Date(c("20200124", "20200212", "20200226", "20200311"), "%Y%m%d"),
@@ -299,7 +298,6 @@ visualise_ts_pex <- function(epis) {
     scale_color_discrete("Lines") +
     facet_wrap(Loc~., ncol = 5) +
     labs(title = "") +
-    #theme_minimal() +
     theme(legend.position = "bottom", axis.text.x = element_text(angle = 60, hjust = 1))
   
   g_pex
@@ -330,13 +328,13 @@ visualise_ts_prv <- function(epis, log = T) {
   g_prv <- ggplot(prv_prov, aes(x = Date)) +
     geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.3) +
     geom_line(aes(y = mean)) +
-    geom_hline(data = m_prov, aes(yintercept = EffN, colour = "Ppopulation at risk")) +
+    geom_hline(data = m_prov, aes(yintercept = EffN, colour = "Effective population size")) +
     geom_vline(aes(xintercept = as.Date("20200212", "%Y%m%d")), linetype = "dashed") +
     geom_point(data = cases, aes(y = Value, colour = "Data"), size = 0.5)
     
   if (log) {
     g_prv <- g_prv + 
-      scale_y_log10("Number of active cases, log10 scale", breaks = c(5, 50, 500, 5E3, 5E4)) + 
+      scale_y_log10("Number of active cases, logarithm scale with base 10", breaks = c(5, 50, 500, 5E3, 5E4)) + 
       facet_wrap(Loc~., ncol = 5)
   } else {
     g_prv <- g_prv +
@@ -355,7 +353,6 @@ visualise_ts_prv <- function(epis, log = T) {
                  limits = as.Date(c("20200124", "20200311"), "%Y%m%d")) +
     scale_color_discrete("") +
     labs(title = "") +
-    #theme_minimal() +
     theme(legend.position = "bottom", axis.text.x = element_text(angle = 60, hjust = 1))
     
   return(g_prv)

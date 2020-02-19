@@ -31,7 +31,7 @@ fit_bass <- function(pro, cases, n_iter = 1E4, r_rec = 0, r_death = 0) {
       x2 = nim0 * nim2,
       A = nr,
       nu = r_rec + r_death,
-      mx = max(ni)
+      mx = max(nc$I + nc$A)
     )
   })(cases)
   

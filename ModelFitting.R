@@ -20,11 +20,7 @@ load(file = "Data/data.rdata")
 names_province <- unique(n_province$Prov)
 
 get_cases <- function(prov) {
-  if (prov == "Overall") {
-    dat <- n_china
-  } else {
-    dat <- subset(n_province, Prov == prov)
-  }
+  dat <- subset(n_province, Prov == prov)
   I <- ts(dat$Confirmed, start = min(dat$time))
   A <- ts(dat$Cured + dat$Dead, start = min(dat$time))
   return(list(I = I, A = A))
@@ -49,16 +45,6 @@ meta <- list(
 list_bfs <- list()
 list_bass <- list()
 list_sir <- list()
-
-
-#dat <- get_cases("Overall")
-#fitted_bass <- fit_bass("Overall", dat, n_iter, r_rec = r_rec, r_death = r_death)
-#fitted_sir <- fit_sir("Overall", dat, n_iter, r_rec = r_rec, r_death = r_death)
-
-#list_bass$Overall <- fitted_bass
-#list_sir$Overall <- fitted_sir
-#
-#list_bfs$Overall <- calc_bayes_factor(fitted_bass, fitted_sir)
 
 exc <- c()
 for (pro in names_province) {

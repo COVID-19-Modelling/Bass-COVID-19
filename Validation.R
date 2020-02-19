@@ -44,8 +44,9 @@ for (pro in names_province) {
   dat <- get_cases(pro)
   
   if (length(dat$I) > 5) {
-    list_errors[[pro]] <- validate_bass(pro, dat, r_rec = r_rec, r_death = r_death, n_iter = n_iter, 
-                                     n_sim = n_sim, n_valid = n_valid) 
+    list_errors[[pro]] <- validate_bass(pro, dat, r_rec = r_rec, 
+                                        r_death = r_death, n_iter = n_iter, 
+                                        n_sim = n_sim, n_valid = n_valid) 
     cat(" completed\n")
   } else {
     exc <- c(exc, pro)

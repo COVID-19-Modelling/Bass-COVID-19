@@ -1,6 +1,6 @@
 #' Model fitting
 #' 
-#' Fit Bass-SIR model to notification data of comfirmed cases, the recovered, and the dead
+#' Fit Bass-SIR models to notification data of comfirmed cases, the recovered, and the dead
 #' 
 #' Author: Chu-Chang Ku
 #'

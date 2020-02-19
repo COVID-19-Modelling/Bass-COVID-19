@@ -26,9 +26,6 @@ calc_bayes_factor <- function(...) {
   bfs <- exp(devs - devs[1])
   names(bfs) <- sapply(m.list, function(x) paste0("BF.", x$Model))
   
-  c(list(Location = m.list[[1]]$Summary$Location), 
-    as.list(bfs),
-    as.list(dics))
   return(c(
       list(Location = m.list[[1]]$Summary$Location), 
       as.list(bfs),

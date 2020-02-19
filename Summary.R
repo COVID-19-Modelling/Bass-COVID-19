@@ -1,7 +1,11 @@
-#' todo meta data
+#' Summary
+#' 
+#' Output summary tables for 
+#' - Model fitting and model comparison
+#' - Epidemiological evaluation
 #'
 #'
-#'
+#' Author: Chu-Chang Ku
 #'
 
 rm(list = ls())

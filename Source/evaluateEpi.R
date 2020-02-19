@@ -1,11 +1,9 @@
-eval_epi <- function(sim, date0 = as.Date("2020-02-12", "%Y-%m-%d"), target = 30) {
+eval_epi <- function(sim, date0 = as.Date("2020-02-12", "%Y-%m-%d")) {
   tab <- sim$Base
   intv <- sim$Lock
   
   start <- 43
   start_i <- 1
-  target <- start + target
-  target_i <- target - start + 1
   date_start <- date0 + start_i - 1
   
   n_iter <- dim(tab)[3]
@@ -21,7 +19,6 @@ eval_epi <- function(sim, date0 = as.Date("2020-02-12", "%Y-%m-%d"), target = 30
   
   if ("PrEx" %in% dimnames(tab)[[2]]) {
     epi$PrExFOI <- tab[start_i, "PrEx", ]
-    epi$PrExFOI <- tab[target_i, "PrEx", ]
   }
   
   if ("R0" %in% dimnames(tab)[[2]]) {
@@ -32,7 +29,6 @@ eval_epi <- function(sim, date0 = as.Date("2020-02-12", "%Y-%m-%d"), target = 30
   
   paf <- (tab[, "I", ] - intv[, "I", ]) / tab[, "I", ] * 100 
   epi$PAF_s <- paf[start_i, ]
-  epi$PAF_c <- paf[target_i, ]
   epi$PAF_2 <- paf[start_i + 14, ]
   epi$PAF_4 <- paf[start_i + 28, ]
   

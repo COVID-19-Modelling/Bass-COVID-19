@@ -1,7 +1,10 @@
-#' todo meta data
+#' Model validation
+#' 
+#' Evaluate the goodness of fit for Bass-SIR models
 #'
 #'
 #'
+#' Author: Chu-Chang Ku
 #'
 
 rm(list = ls())

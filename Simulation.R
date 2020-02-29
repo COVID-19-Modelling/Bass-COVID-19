@@ -9,13 +9,19 @@
 
 rm(list = ls())
 
+options(odin.verbose = F,
+        odin.target = ifelse(odin::can_compile(), "c", "r"),
+        odin.compiler_warnings = F,
+        odin.no_check_unused_equations = T
+)
+
 
 ##### Load requirements -----
 library(BassSIR)
 
 load(file = "Output/Fitted.rdata")
 
-max_iter <- 3000 # to match the posterior parameters
+max_iter <- 300 # 3000 to match the posterior parameters
 
 set.seed(1166)
 

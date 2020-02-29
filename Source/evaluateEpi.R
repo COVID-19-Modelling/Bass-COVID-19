@@ -55,8 +55,7 @@ eval_epi <- function(sim, date0 = as.Date("2020-02-12", "%Y-%m-%d")) {
   cases <- sim$Data$I
   n_c <- length(cases)
   dat <- data.table::data.table(Index = rep(c("Comfirmed cases"), each = n_c), 
-                    Value =  c(cases),
-                    Date = date_start - n_c:1 + 1)
+                                Value =  c(cases), Date = date_start - n_c:1 + 1)
   
   return(list(
     Location = sim$Location,

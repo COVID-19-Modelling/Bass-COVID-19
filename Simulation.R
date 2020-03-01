@@ -9,11 +9,15 @@
 
 rm(list = ls())
 
+options(odin.verbose = F,
+        odin.target = ifelse(odin::can_compile(), "c", "r"),
+        odin.compiler_warnings = F,
+        odin.no_check_unused_equations = T
+)
+
 
 ##### Load requirements -----
-source("Source/statistics.R")
-source("Source/simulateBassSIR.R")
-source("Source/simulateSIR.R")
+library(BassSIR)
 
 load(file = "Output/Fitted.rdata")
 
@@ -23,9 +27,15 @@ set.seed(1166)
 
 
 ##### Simulate -----
-sims_bass <- lapply(list_bass, forecast_bass, end = 80, max_iter = max_iter)
-sims_sir <- lapply(list_sir, forecast_sir, end = 80, max_iter = max_iter)
+sims_bass <- lapply(est_bass, simulate, nsim = max_iter)
+sims_sir <- lapply(est_sir, simulate, nsim = max_iter)
+
+
+##### Epidemic indices
+epis_bass <- data.table::rbindlist(lapply(sims_bass, function(x) summary(x)$Indices))
+epis_sir <- data.table::rbindlist(lapply(sims_sir, function(x) summary(x)$Indices))
 
 
 ##### Output -----
 save(sims_bass, sims_sir, file = "Output/Simulation.rdata")
+save(epis_bass, epis_sir, file = "Output/Epidemiology.rdata")

@@ -62,16 +62,5 @@ for (pro in names_province) {
 }
 
 
-##### Result extraction -----
-results_bass <- data.table::rbindlist(lapply(est_bass, function(x) summary(x)$Pars))
-results_si <- data.table::rbindlist(lapply(est_sir, function(x) summary(x)$Pars))
-results_comp <- data.table::rbindlist(est_comp)
-
-
-##### Output results -----
-write.csv(results_bass, "Output/Table/EstBassSIR.csv")
-write.csv(results_si, "Output/Table/EstSIR.csv")
-write.csv(results_comp, "Output/Table/BayesFactor.csv")
-
 save(meta, est_comp, est_bass, est_sir, 
      fitted_bass, fitted_sir, exc, file = "Output/Fitted.rdata")

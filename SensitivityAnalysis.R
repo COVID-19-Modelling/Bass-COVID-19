@@ -10,28 +10,13 @@ rm(list = ls())
 
 
 ##### Load requirements -----
-library(R2jags)
-library(data.table)
-source("Source/statistics.R")
-source("Source/fitBassSIR.R")
-source("Source/fitSIR.R")
-source("Source/summarise.R")
+library(BassSIR)
 
-
-##### Load data -----
-load(file = "Data/data.rdata")
-names_province <- unique(n_province$Prov)
-
-get_cases <- function(prov) {
-  dat <- subset(n_province, Prov == prov)
-  I <- ts(dat$Confirmed, start = min(dat$time))
-  A <- ts(dat$Cured + dat$Dead, start = min(dat$time))
-  return(list(I = I, A = A))
-}
+names_province <- sort(names(n_covid19))
 
 
 ##### Set parameters -----
-n_iter <- 1E5 # number of iterations
+n_iter <- 1E4 # number of iterations
 r_rec <- 1 / 12 # recovery rate
 r_death <- 1 / 12 # death rate of the infected
 
@@ -45,16 +30,14 @@ meta <- list(
 )
 
 ##### Fit models -----
-list_bass <- list()
+est_bass <- list()
 
 exc <- c()
 for (pro in names_province) {
-  dat <- get_cases(pro)
+  cases <- as_bass_data(n_covid19[[pro]], id = pro)
   
-  if (length(dat$I) > 5) {
-    cat(pro, "--")
-    list_bass[[pro]] <- fit_bass(pro, dat, n_iter, r_rec = r_rec, r_death = r_death)
-    
+  if (cases$len > 5) {
+    est_bass[[pro]] <- BassSIR::fit(cases, r_rec = r_rec, r_death = r_death, type = "BassSIR", n_iter = n_iter)
     cat(" completed\n")
   } else {
     exc <- c(exc, pro)
@@ -62,9 +45,9 @@ for (pro in names_province) {
   }
 }
 
+results_bass_6 <- data.table::rbindlist(lapply(est_bass, 
+                                        function(x) c(list(Location = x$Cases$ID), summary(x)$Pars)))
 
-save(meta, list_bass, exc, file = "Output/Fitted_6d.rdata")
-list_bass_6 <- list_bass
 
 ##### Set parameters -----
 n_iter <- 1E5 # number of iterations
@@ -81,16 +64,14 @@ meta <- list(
 )
 
 ##### Fit models -----
-list_bass <- list()
+est_bass <- list()
 
 exc <- c()
 for (pro in names_province) {
-  dat <- get_cases(pro)
+  cases <- as_bass_data(n_covid19[[pro]], id = pro)
   
-  if (length(dat$I) > 5) {
-    cat(pro, "--")
-    list_bass[[pro]] <- fit_bass(pro, dat, n_iter, r_rec = r_rec, r_death = r_death)
-    
+  if (cases$len > 5) {
+    est_bass[[pro]] <- BassSIR::fit(cases, r_rec = r_rec, r_death = r_death, type = "BassSIR", n_iter = n_iter)
     cat(" completed\n")
   } else {
     exc <- c(exc, pro)
@@ -98,24 +79,29 @@ for (pro in names_province) {
   }
 }
 
+results_bass_22 <- data.table::rbindlist(lapply(est_bass, 
+                                         function(x) c(list(Location = x$Cases$ID), summary(x)$Pars)))
 
-save(meta, list_bass, exc, file = "Output/Fitted_6d.rdata")
-list_bass_22 <- list_bass
 
 
 ##### Summarise results -----
 load(file = "Output/Fitted.rdata")
 
 
-list_bass_11 <- list_bass
-
+results_bass_11 <- data.table::rbindlist(lapply(est_bass, 
+                                         function(x) c(list(Location = x$Cases$ID), summary(x)$Pars)))
 
 
 ##### Output results -----
-sens <- summary_sensitivity(list_bass_6, list_bass_11, list_bass_22, 
-                            labels = c("D6", "D11", "D22"))
+
+
+sens <- results_bass_11
+sens <- merge(sens, results_bass_6, by = "Location", suffixes = c("", "::D6"))
+sens <- merge(sens, results_bass_22, by = "Location", suffixes = c("", "::D22"))
+
+names(sens)[2:ncol(results_bass_11)] <- paste0(names(sens)[2:ncol(results_bass_11)], "::D11")
 
 
 write.csv(sens, "Output/Table/Sensitivity.csv")
 
-save(sens, list_bass_6, list_bass_11, list_bass_22, file = "Output/Sensitivity.rdata")
+save(sens, results_bass_6, results_bass_11, results_bass_22, file = "Output/Sensitivity.rdata")

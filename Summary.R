@@ -9,6 +9,7 @@
 #'
 rm(list = ls())
 library(tidyverse)
+library(BassSIR)
 
 ##### Result of model fitting -----
 load(file = "Output/Fitted.rdata")
@@ -23,7 +24,22 @@ write.csv(results_comp, "Output/Table/BayesFactor.csv")
 
 
 ##### Results of simulation
+load(file = "Output/Simulation.rdata")
 load(file = "Output/Epidemiology.rdata")
+
+
+traj_I <- list()
+traj_Rt <- list()
+
+for (pro in names(est_bass)) {
+  traj_I[[pro]] <- to_vis_trajectory(est_bass[[pro]], sims_bass[[pro]], traj = "I")
+  traj_Rt[[pro]] <- to_vis_trajectory(est_bass[[pro]], sims_bass[[pro]], traj = "Rt")
+}
+
+
+jsonlite::write_json(traj_I, "Output/JSON/TrajectoryPrv.json")
+jsonlite::write_json(traj_Rt, "Output/JSON/TrajectoryRt.json")
+
 
 write.csv(epis_bass, "Output/Table/EpiIndices.csv")
 jsonlite::write_json(epis_bass, "Output/JSON/EpiIndices.json")
@@ -32,22 +48,6 @@ jsonlite::write_json(epis_bass, "Output/JSON/EpiIndices.json")
 ##### Results of scenario analysis
 load(file = "Output/Intervention.rdata")
 load(file = "Output/Scenarios.rdata")
-
-
-traj_I <- list()
-traj_Rt <- list()
-for (pro in names(intv_lockdown)) {
-  temp <- intv_lockdown[[pro]]$Trajectories$I %>% filter(Scenario == "Baseline")
-  temp <- cbind(Location = pro, variable = "Prevalence", temp)
-  traj_I[[pro]] <- temp
-  temp <- intv_lockdown[[pro]]$Trajectories$Re %>% filter(Scenario == "Baseline")
-  temp <- cbind(Location = pro, variable = "R(t)", temp)
-  traj_Rt[[pro]] <- temp
-}
-traj_I <- data.table::rbindlist(traj_I)
-traj_Rt <- data.table::rbindlist(traj_Rt)
-jsonlite::write_json(traj_I, "Output/JSON/TrajectoryPrv.json")
-jsonlite::write_json(traj_Rt, "Output/JSON/TrajectoryRt.json")
 
 
 results_lockdown <- list()
@@ -70,6 +70,7 @@ jsonlite::write_json(results_scs, "Output/JSON/Scenarios.json")
 
 
 
-dd <- data.table::data.table(x = c(4, 5), y = c(1, 3))
+##### Data for visualisation
+save(epis_bass, traj_I, traj_Rt, results_lockdown, results_scs, file = "Output/ForVis.rdata")
 
-toJSON(list("k", j=dd))
+

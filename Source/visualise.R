@@ -1,20 +1,16 @@
 visualise_re <- function(epis) {
-  dat <- collect_statistics(epis)
-  
   g_re <-
-    dat %>% filter(Loc != "Overall") %>% select(Loc, R0, Re) %>%
-    melt(id.vars = "Loc", measure.vars = c("R0", "Re")) %>% group_by(Loc, variable) %>%
-    summarise_all(funs(mean = mean(value), lower = quantile(value, 0.025), upper = quantile(value, 0.975))) %>%
-    group_by(Loc) %>% mutate(key = max(mean)) %>% ungroup() %>%
-    mutate(hubei = ifelse(Loc == "Hubei", "red", "black")) %>% 
-    ggplot(aes(x = reorder(Loc, key))) +
+    epis %>% filter(variable %in% c("R0", "R(t)")) %>%
+    group_by(Location) %>% mutate(key = max(mean)) %>% ungroup() %>%
+    mutate(hubei = ifelse(Location == "Hubei", "red", "black")) %>% 
+    ggplot(aes(x = reorder(Location, key))) +
     geom_pointrange(aes(y = mean, ymin = lower, ymax = upper, colour = variable), 
                     position = position_dodge(width = 0.3)) +
     geom_hline(yintercept = 1, linetype = "dashed") +
     scale_y_continuous("Reproduction number", breaks = c(0, 1, 2, 4, 6, 8)) +
     scale_x_discrete("Province") +
     coord_flip() +
-    scale_color_discrete("", labels = c("R0", "R(t)")) +
+    scale_color_discrete("") +
     expand_limits(y = c(0, 8)) +
     guides(colour = guide_legend(reverse = T)) +
     theme(legend.position = c(0.8, 0.5))
@@ -24,34 +20,25 @@ visualise_re <- function(epis) {
 
 
 visualise_peak <- function(epis, bind = T) {
-  dat <- collect_statistics(epis)
-  
-  peaks <- dat %>% filter(Loc != "Overall") %>% select(Loc, PeakSize, PeakTime) %>% group_by(Loc) %>% 
-    summarise_all(funs("mean", lower = quantile(., 0.025), upper = quantile(., 0.975)))
-  
-  
   g_peak_size <- 
-    peaks %>%
-    mutate(hubei = ifelse(Loc == "Hubei", "red", "black")) %>% 
-    ggplot(aes(x = reorder(Loc, PeakSize_mean))) +
-    geom_pointrange(aes(y = PeakSize_mean, ymin = PeakSize_lower, ymax = PeakSize_upper, colour = hubei)) +
+    epis %>% filter(variable == "PeakSize") %>% 
+    mutate(hubei = ifelse(Location == "Hubei", "red", "black")) %>% 
+    ggplot(aes(x = reorder(Location, mean))) +
+    geom_pointrange(aes(y = mean, ymin = lower, ymax = upper, colour = hubei)) +
     scale_y_log10("Size of outbreak peak", breaks = c(1, 10, 100, 1000, 10000)) +
     scale_x_discrete("Province") +
     scale_color_manual(values = c("black", "red")) +
     coord_flip() +
     theme(legend.position = "none")
 
-  date0 <- epis[[1]]$Forecasts$Date[1] - 1
+  date0 <- as.Date("20200212", "%Y%m%d")
   
   g_peak_time <- 
-    peaks %>%
-    mutate(hubei = ifelse(Loc == "Hubei", "red", "black"),
-           order = frank(., PeakTime_mean, PeakTime_upper),
-           PeakTime_mean = date0 + round(PeakTime_mean),
-           PeakTime_lower = date0 + round(PeakTime_lower),
-           PeakTime_upper = date0 + round(PeakTime_upper)) %>% 
-    ggplot(aes(x = reorder(Loc, order))) +
-    geom_pointrange(aes(y = PeakTime_mean, ymin = PeakTime_lower, ymax = PeakTime_upper, colour = hubei)) +
+    epis %>% filter(variable == "PeakTime") %>%
+    mutate(hubei = ifelse(Location == "Hubei", "red", "black")) %>% 
+    ggplot(aes(x = reorder(Location, mean))) +
+    geom_pointrange(aes(y = round(mean) + date0, ymin = round(lower) + date0, 
+                        ymax = round(upper) + date0, colour = hubei)) +
     scale_y_date("Date of outbreak peak") +
     scale_x_discrete("Province") +
     scale_color_manual(values = c("black", "red")) +
@@ -66,19 +53,13 @@ visualise_peak <- function(epis, bind = T) {
 }
 
 visualise_lockdown <- function(epis, bind = T) {
-  dat <- collect_statistics(epis)
-  
-  lockdown <- dat %>% filter(Loc != "Overall") %>% 
-    select(Loc, PrExFOI, PAF_2, PAF_4) %>% group_by(Loc) %>% 
-    summarise_all(funs(mean = round(mean(.)), lower = quantile(., 0.025), upper = quantile(., 0.975))) %>%
-    mutate(hubei = ifelse(Loc == "Hubei", "red", "black"))
-  
+  lockdown <- epis %>% mutate(hubei = ifelse(Location == "Hubei", "red", "black"))
   
   g_exo <- 
-    lockdown %>% 
-    ggplot(aes(x = reorder(Loc, frank(., PrExFOI_mean, PrExFOI_upper)))) +
-    geom_pointrange(aes(y = PrExFOI_mean, ymin = PrExFOI_lower, 
-                        ymax = PrExFOI_upper, colour = hubei)) +
+    lockdown %>% filter(variable == "PrEx" & Scenario == "Baseline") %>%
+    ggplot(aes(x = reorder(Location, data.table::frank(., mean, upper)))) +
+    geom_pointrange(aes(y = mean, ymin = lower, 
+                        ymax = upper, colour = hubei)) +
     scale_color_manual(values = c("black", "red")) +
     coord_flip() +
     expand_limits(y=c(0, 100))
@@ -86,9 +67,9 @@ visualise_lockdown <- function(epis, bind = T) {
   #ggsave(plot = g_exo, filename = "Output/Figure/ExoFOI.pdf")
   
   g_paf <- 
-    lockdown %>%
-    ggplot(aes(x = reorder(Loc, frank(., PAF_2_mean, PAF_2_upper)))) +
-    geom_pointrange(aes(y = PAF_2_mean, ymin = PAF_2_lower, ymax = PAF_2_upper, colour = hubei)) +
+    lockdown %>% filter(variable == "PAF_2w") %>%
+    ggplot(aes(x = reorder(Location, data.table::frank(., -mean, -upper)))) +
+    geom_pointrange(aes(y = -mean, ymin = -lower, ymax = -upper, colour = hubei)) +
     scale_x_discrete("Province", position = "right") +
     scale_color_manual(values = c("black", "red")) +
     expand_limits(y=c(0, 100)) +
@@ -109,18 +90,19 @@ visualise_lockdown <- function(epis, bind = T) {
             axis.text.y = element_text(hjust=0))
     
     links <- with(lockdown, {
-      x0 <- reorder(Loc, frank(lockdown, PrExFOI_mean, PrExFOI_upper))
+      loc <- Location[variable == "PrEx" & Scenario == "Baseline"]
+      x0 <- reorder(loc, data.table::frank(lockdown[variable == "PrEx" & Scenario == "Baseline",], mean, upper))
       x0 <- sort(x0)
       anc <- 1:length(x0)
       names(anc) <- levels(x0)
-      x1 <- reorder(Loc, frank(lockdown, PAF_2_mean, PAF_2_upper))
+      x1 <- reorder(loc, data.table::frank(lockdown[variable == "PAF_2w",], -mean, -upper))
       lx1 <- levels(x1)
       xo <- rep(0, length(x0))
       for (i in 1:length(x0)) {
         xo[i] <- which(lx1 == x0[i])
       }
       x1 <- factor(levels(x0)[xo], levels(x0))
-      data.table(x0 = x0, x1 = x1, up = 1:length(x0) > xo)
+      data.table::data.table(x0 = x0, x1 = x1, up = 1:length(x0) > xo)
     })
     
     
@@ -156,6 +138,7 @@ visualise_lockdown <- function(epis, bind = T) {
   }
 }
 
+
 visualise_ts_prov <- function(epi, loc) {
   cases <- epi$Data
   
@@ -186,39 +169,38 @@ visualise_ts_prov <- function(epi, loc) {
 }
 
 
-visualise_ts_r0 <- function(epis) {
-  for(i in names(epis)) {
-    epis[[i]]$Location <- i
+visualise_ts_r0 <- function(traj, epis) {
+  fitted <- list()
+  simulation <- list()
+  r0 <- epis %>% filter(variable == "R0")
+  
+  for (pro in names(traj)) {
+    tr <- traj[[pro]]
+    fitted[[pro]] <- cbind(Location = pro, tr$Fitted)
+    simulation[[pro]] <- cbind(Location = pro, tr$Simulation)
   }
+  fitted <- data.table::rbindlist(fitted)
+  simulation <- data.table::rbindlist(simulation)
   
-  re_prov <- rbindlist(lapply(epis, function(epi) {
-    tab <- rbind(
-      extract_fitted(epi, key = "Re_hat", name = "Effective reproduction number"),
-      extract_tab(epi, key = "Re", name = "Effective reproduction number")
-    )
-    tab <- cbind(tab, Loc = epi$Location)
-    tab
-  }))
-  
-  r0_prov <- collect_statistics(epis)[, .(Loc, R0)] %>% group_by(Loc) %>% summarise_all("mean")
-  
-  g_re <- ggplot(re_prov, aes(x = Date)) +
+  g_re <- ggplot(fitted, aes(x = Time)) +
     geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.3) +
     geom_line(aes(y = mean)) +
-    geom_hline(data = r0_prov, aes(yintercept = R0, colour = "R0")) +
+    geom_ribbon(data = simulation, aes(ymin = lower, ymax = upper), alpha = 0.3) +
+    geom_line(data = simulation, aes(y = mean)) +
+    geom_hline(data = r0, aes(yintercept = mean, colour = "R0")) +
     geom_vline(aes(xintercept = as.Date("20200212", "%Y%m%d")), linetype = "dashed") +
     geom_hline(aes(yintercept = 1, colour = "R(t) = 1")) +
     scale_y_continuous("Effective reproduction number", breaks = c(0, 1, 3, 5, 7, 8)) + 
     scale_x_date("Date", date_labels = "%e %b %Y",
                  breaks = as.Date(c("20200124", "20200212", "20200226", "20200311"), "%Y%m%d"),
                  limits = as.Date(c("20200124", "20200311"), "%Y%m%d")) +
-    geom_text(data = r0_prov, 
+    geom_text(data = r0, 
               aes(x = as.Date("20200302", "%Y%m%d"), 
-                  y = R0, 
-                  label = paste0("R0=", round(R0, 1)), 
+                  y = mean, 
+                  label = paste0("R0=", round(mean, 1)), 
                   vjust = -0.4)) +
     scale_color_discrete("Lines") +
-    facet_wrap(Loc~., ncol = 5) +
+    facet_wrap(Location~., ncol = 5) +
     labs(title = "") +
     theme(legend.position = "bottom", axis.text.x = element_text(angle = 60, hjust = 1))
   
@@ -226,50 +208,41 @@ visualise_ts_r0 <- function(epis) {
 }
 
 
-visualise_ts_r0_sel <- function(epis, sel, nc = 3) {
-  epis_sel <- list()
+visualise_ts_r0_sel <- function(traj, epis, sel, nc = 3) {
+  fitted <- list()
+  simulation <- list()
+  r0 <- epis %>% filter(variable == "R0" & Location %in% sel)
+  r0$Location <- factor(r0$Location, levels = sel)
   
-  for(i in names(epis)) {
-    if (i %in% sel) {
-      epis[[i]]$Location <- i
-      epis_sel[[i]] <- epis[[i]] 
-    }
+  for (pro in sel) {
+    tr <- traj[[pro]]
+    fitted[[pro]] <- cbind(Location = pro, tr$Fitted)
+    simulation[[pro]] <- cbind(Location = pro, tr$Simulation)
   }
+  fitted <- data.table::rbindlist(fitted)
+  fitted$Location <- factor(fitted$Location, levels = sel)
+  simulation <- data.table::rbindlist(simulation)
+  simulation$Location <- factor(simulation$Location, levels = sel)
   
-  epis <- epis_sel
-  nc <- min(length(sel), nc)
-  
-  re_prov <- rbindlist(lapply(epis, function(epi) {
-    tab <- rbind(
-      extract_fitted(epi, key = "Re_hat", name = "Effective reproduction number"),
-      extract_tab(epi, key = "Re", name = "Effective reproduction number")
-    )
-    tab <- cbind(tab, Loc = epi$Location)
-    tab
-  }))
-  re_prov$Loc <- factor(re_prov$Loc, levels = sel)
-  #re_prov[, upper := min(upper, 5)]
-  
-  r0_prov <- collect_statistics(epis)[, .(Loc, R0)] %>% group_by(Loc) %>% summarise_all("mean")
-  r0_prov$Loc <- factor(r0_prov$Loc, levels = sel)
-  
-  g_re <- ggplot(re_prov, aes(x = Date)) +
+  g_re <- ggplot(fitted, aes(x = Time)) +
     geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.3) +
     geom_line(aes(y = mean)) +
-    geom_hline(data = r0_prov, aes(yintercept = R0, colour = "R0")) +
+    geom_ribbon(data = simulation, aes(ymin = lower, ymax = upper), alpha = 0.3) +
+    geom_line(data = simulation, aes(y = mean)) +
+    geom_hline(data = r0, aes(yintercept = mean, colour = "R0")) +
     geom_vline(aes(xintercept = as.Date("20200212", "%Y%m%d")), linetype = "dashed") +
     geom_hline(aes(yintercept = 1, colour = "R(t) = 1")) +
-    # geom_text(data = r0_prov, 
-    #           aes(x = as.Date("20200302", "%Y%m%d"), 
-    #               y = R0, 
-    #               label = paste0("R0=", round(R0, 1)), 
-    #               vjust = -1)) +
     scale_y_continuous("Effective reproduction number", breaks = c(0, 1, 3, 5, 7, 8)) + 
     scale_x_date("Date", date_labels = "%e %b %Y",
                  breaks = as.Date(c("20200124", "20200212", "20200226", "20200311"), "%Y%m%d"),
                  limits = as.Date(c("20200124", "20200311"), "%Y%m%d")) +
+    geom_text(data = r0, 
+              aes(x = as.Date("20200302", "%Y%m%d"), 
+                  y = mean, 
+                  label = paste0("R0=", round(mean, 1)), 
+                  vjust = -0.4)) +
     scale_color_discrete("Lines") +
-    facet_wrap(Loc~., ncol = nc) +
+    facet_wrap(Location~., ncol = nc) +
     labs(title = "") +
     theme(legend.position = "bottom", axis.text.x = element_text(angle = 60, hjust = 1))
   
@@ -306,46 +279,44 @@ visualise_ts_pex <- function(epis) {
 }
 
 
-visualise_ts_prv <- function(epis, log = T) {
-  for(i in names(epis)) {
-    epis[[i]]$Location <- i
+visualise_ts_prv <- function(traj, epis, log = T) {
+  cases <- list()
+  fitted <- list()
+  simulation <- list()
+  m <- epis %>% filter(variable == "m")
+  
+  for (pro in names(traj)) {
+    tr <- traj[[pro]]
+    cases[[pro]] <- cbind(Location = pro, tr$Data)
+    fitted[[pro]] <- cbind(Location = pro, tr$Fitted)
+    simulation[[pro]] <- cbind(Location = pro, tr$Simulation)
   }
+  cases <- data.table::rbindlist(cases)
+  fitted <- data.table::rbindlist(fitted)
+  simulation <- data.table::rbindlist(simulation)
   
-  cases <- rbindlist(lapply(epis, function(epi) {
-    d <- epi$Data
-    d <- cbind(d, Loc = epi$Location)
-  }))
-  
-  prv_prov <- rbindlist(lapply(epis, function(epi) {
-    tab <- rbind(
-      extract_fitted(epi, key = "Cases_hat", name = "Comfirmed cases"),
-      extract_tab(epi, key = "Prv", name = "Comfirmed cases")
-    )
-    tab <- cbind(tab, Loc = epi$Location)
-    tab
-  }))
-  
-  m_prov <- collect_statistics(epis)[, .(Loc, EffN)] %>% group_by(Loc) %>% summarise_all("mean")
-  
-  g_prv <- ggplot(prv_prov, aes(x = Date)) +
+
+  g_prv <- ggplot(fitted, aes(x = Time)) +
     geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.3) +
     geom_line(aes(y = mean)) +
-    geom_hline(data = m_prov, aes(yintercept = EffN, colour = "Effective population size")) +
+    geom_ribbon(data = simulation, aes(ymin = lower, ymax = upper), alpha = 0.3) +
+    geom_line(data = simulation, aes(y = mean)) +
+    geom_hline(data = m, aes(yintercept = mean, colour = "Effective population size")) +
     geom_vline(aes(xintercept = as.Date("20200212", "%Y%m%d")), linetype = "dashed") +
-    geom_point(data = cases, aes(y = Value, colour = "Data"), size = 0.5)
+    geom_point(data = cases, aes(y = Data, colour = "Data"), size = 0.5)
     
   if (log) {
     g_prv <- g_prv + 
       scale_y_log10("Number of active cases, logarithm scale with base 10", breaks = c(5, 50, 500, 5E3, 5E4)) + 
-      facet_wrap(Loc~., ncol = 5)
+      facet_wrap(Location~., ncol = 5)
   } else {
     g_prv <- g_prv +
       scale_y_continuous("Active cases") + 
-      facet_wrap(Loc~., ncol = 5, scales = "free_y") + 
-      geom_text(data = m_prov, 
+      facet_wrap(Location~., ncol = 5, scales = "free_y") + 
+      geom_text(data = m, 
                 aes(x = as.Date("20200302", "%Y%m%d"), 
-                    y = EffN, 
-                    label = paste0("", round(EffN/1000, 1), "E3"), 
+                    y = mean, 
+                    label = paste0("", round(mean/1000, 1), "E3"), 
                     vjust = 1.3))
   }
     
@@ -363,8 +334,8 @@ visualise_ts_prv <- function(epis, log = T) {
 
 visualise_scenarios <- function(res_sc) {
   g_scs_ts <- 
-    rbindlist(res_sc$SummaryPrv) %>% 
-    ggplot(aes(x = Date)) +
+    res_sc %>% 
+    ggplot(aes(x = Time)) +
     geom_ribbon(aes(ymin = lower/1E3, ymax = upper/1E3, fill = Scenario), alpha = 0.4) +
     geom_line(aes(y = mean/1E3, colour = Scenario)) +
     scale_y_continuous("Number of active cases, thousands") +
@@ -375,9 +346,9 @@ visualise_scenarios <- function(res_sc) {
     theme(legend.position = c(0, 0), legend.justification = c(-0.1, -0.1))
   
   g_scs_range <- 
-    rbindlist(res_sc$SummaryPrv) %>% 
-    filter(Date %in% as.Date(c("17 Feb 2020", "24 Feb 2020", "02 Mar 2020", "11 Mar 2020"), "%d %b %Y")) %>%
-    mutate(dl = reorder(format(Date, "%e %b %Y"), Date)) %>%
+    res_sc %>% 
+    filter(Time %in% as.Date(c("17 Feb 2020", "24 Feb 2020", "02 Mar 2020", "11 Mar 2020"), "%d %b %Y")) %>%
+    mutate(dl = reorder(format(Time, "%e %b %Y"), Time)) %>%
     ggplot(aes(x = Scenario, y = mean/1E3)) +
     geom_point(aes(colour = Scenario)) +
     geom_errorbar(aes(ymin = lower/1E3, ymax = upper/1E3, colour = Scenario), width = 0.4) +

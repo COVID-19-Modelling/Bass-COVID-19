@@ -1,4 +1,4 @@
-"","Location","index","Time","Scenario","mean","lower","upper"
+"","Location","variable","Time","Scenario","mean","lower","upper"
 "1","Anhui","PrEx",2020-02-12,"Baseline",3.94792384985259,1.31321651328117,7.41590562886121
 "2","Anhui","PrEx",2020-02-12,"Lockdown",0,0,0
 "3","Anhui","PAF_2w",2020-02-26,"Lockdown",-0.338795788535054,-1.19318991353188,-0.0247127872050179
